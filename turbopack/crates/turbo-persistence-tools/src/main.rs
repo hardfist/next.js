@@ -20,6 +20,7 @@ fn main() -> Result<()> {
     let meta_info = db
         .meta_info()
         .context("Failed to retrieve meta information")?;
+    dbg!(&meta_info.len());
     for meta_file in meta_info {
         println!(
             "META {:08}.meta: family = {}, sst_size = {} MiB",

@@ -18,8 +18,10 @@ use turbo_tasks::{
     util::{FormatBytes, FormatDuration},
 };
 use turbo_tasks_backend::{
-    BackendOptions, NoopBackingStorage, TurboTasksBackend, noop_backing_storage,
+    BackendOptions, NoopBackingStorage, TurboTasksBackend, default_backing_storage,
+    noop_backing_storage, GitVersionInfo, DefaultBackingStorage,
 };
+use either::Either;
 use turbo_tasks_fs::FileSystem;
 use turbo_tasks_malloc::TurboMalloc;
 use turbopack::evaluate_context::node_build_environment;
@@ -53,7 +55,7 @@ use crate::{
 
 pub(crate) mod web_entry_source;
 
-type Backend = TurboTasksBackend<NoopBackingStorage>;
+type Backend = TurboTasksBackend<Either<DefaultBackingStorage, NoopBackingStorage>>;
 
 pub struct TurbopackDevServerBuilder {
     turbo_tasks: Arc<TurboTasks<Backend>>,
@@ -361,13 +363,46 @@ pub async fn start_server(args: &DevArguments) -> Result<()> {
         root_dir,
     } = normalize_dirs(&args.common.dir, &args.common.root)?;
 
-    let tt = TurboTasks::new(TurboTasksBackend::new(
-        BackendOptions {
-            storage_mode: None,
-            ..Default::default()
-        },
-        noop_backing_storage(),
-    ));
+    let tt = {
+        // Choose backing storage based on --persistent-cache
+        if args.common.persistent_cache {
+            // Default cache dir: <project>/.turbopack/cache
+            let default_cache_dir = {
+                let p = PathBuf::from(project_dir.clone());
+                p.join(".turbopack").join("cache")
+            };
+            let cache_dir = args
+                .common
+                .cache_dir
+                .clone()
+                .unwrap_or(default_cache_dir);
+
+            // Simple version info for cache versioning
+            let version_info = GitVersionInfo {
+                describe: env!("CARGO_PKG_VERSION"),
+                dirty: false,
+            };
+            let is_ci = std::env::var_os("CI").is_some();
+
+            let (backing, _startup_state) = default_backing_storage(
+                &cache_dir,
+                &version_info,
+                is_ci,
+                /* is_short_session */ false,
+            )?;
+
+            let backend = TurboTasksBackend::new(BackendOptions::default(), Either::Left(backing));
+            TurboTasks::new(backend)
+        } else {
+            TurboTasks::new(TurboTasksBackend::new(
+                BackendOptions {
+                    storage_mode: None,
+                    ..Default::default()
+                },
+                Either::Right(noop_backing_storage()),
+            ))
+        }
+    };
 
     let tt_clone = tt.clone();
 

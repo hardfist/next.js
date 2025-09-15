@@ -87,6 +87,14 @@ pub struct CommonArguments {
     /// Whether to build for the `browser` or `node``
     #[clap(long)]
     pub target: Option<Target>,
+
+    /// Enable persistent caching on disk.
+    #[clap(long)]
+    pub persistent_cache: bool,
+
+    /// Directory to store the persistent cache. Defaults to `<project>/.turbopack/cache`.
+    #[clap(long, value_parser)]
+    pub cache_dir: Option<PathBuf>,
 }
 
 #[derive(Debug, Args)]
