@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "inputs": [
     {
@@ -14,14 +11,21 @@
       "id": "nextCommand",
       "type": "pickString",
       "description": "Select the next command",
-      "options": ["dev", "build", "start"],
+      "options": [
+        "dev",
+        "build",
+        "start"
+      ],
       "default": "dev"
     },
     {
       "id": "nextTestMode",
       "type": "pickString",
       "description": "Select the next test mode",
-      "options": ["dev", "start"],
+      "options": [
+        "dev",
+        "start"
+      ],
       "default": "dev"
     }
   ],
@@ -38,7 +42,9 @@
         "${input:appDirname}"
       ],
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "sourceMapPathOverrides": {
         "webpack:///./*": "${workspaceFolder}/${input:appDirname}/*",
         "webpack://_N_E/[.]/(app|pages)/(.*)": "${workspaceFolder}/${input:appDirname}/$1/$2",
@@ -54,8 +60,6 @@
         "turbopack:///[project]/*": "${workspaceFolder}/*"
       },
       "env": {
-        // Enable the following environment variables to use turbopack instead of webpack:
-        // "IS_TURBOPACK_TEST": "1",
         "NEXT_PRIVATE_LOCAL_WEBPACK": "1",
         "NEXT_PRIVATE_SKIP_CANARY_CHECK": "1",
         "NEXT_TELEMETRY_DISABLED": "1"
@@ -73,7 +77,9 @@
         "${fileDirname}"
       ],
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "sourceMapPathOverrides": {
         "webpack:///./*": "${workspaceFolder}/${fileDirname}/*",
         "webpack://_N_E/[.]/(app|pages)/(.*)": "${workspaceFolder}/${fileDirname}/$1/$2",
@@ -100,9 +106,15 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "${workspaceFolder}/node_modules/.bin/jest",
-      "runtimeArgs": ["--runInBand", "--verbose", "${file}"],
+      "runtimeArgs": [
+        "--runInBand",
+        "--verbose",
+        "${file}"
+      ],
       "console": "integratedTerminal",
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "sourceMapPathOverrides": {
         "webpack:///./*": "${workspaceFolder}/${fileDirname}/*",
         "webpack://_N_E/[.]/(app|pages)/(.*)": "${workspaceFolder}/${fileDirname}/$1/$2",
@@ -130,8 +142,12 @@
       "request": "launch",
       "cwd": "${workspaceFolder}",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["clean-trace-jaeger"],
-      "skipFiles": ["<node_internals>/**"],
+      "runtimeArgs": [
+        "clean-trace-jaeger"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "env": {
         "NEXT_PRIVATE_LOCAL_WEBPACK": "1"
       }
@@ -141,10 +157,26 @@
       "request": "attach",
       "name": "Attach to existing debugger",
       "port": 9229,
-      "skipFiles": ["<node_internals>/**"],
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
       "env": {
         "NEXT_PRIVATE_LOCAL_WEBPACK": "1"
       }
+    },
+      {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug TurbopackCLI",
+      "program": "./target/debug/turbopack-cli",
+      "args": [
+        "build",
+        "-d",
+        "./turbopack/crates/turbopack-cli/js",
+        "src/entry/index.ts",
+        "src/entry/other.ts"
+      ],
+      "cwd": "${workspaceFolder}"
     }
   ]
 }
